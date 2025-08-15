@@ -1,0 +1,245 @@
+
+local allmon = {}
+local monNames = {} 
+local excludeList = {"Eyes", "LeftEye", "RightEye", "Mouth", "Bunny Ear"}
+
+for _, v in pairs(game.Workspace.NPCs:GetDescendants()) do
+    if v:IsA("Model") and not v:IsDescendantOf(game.Workspace.NPCs.Boss) then
+        local name = v.Name
+        if not table.find(excludeList, name) and not monNames[name] then
+            table.insert(allmon, name)
+            monNames[name] = true
+        end
+    end
+end
+function Attack()
+    local VirtualUser = game:GetService('VirtualUser')
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
+end
+
+local Weaponlist = {}
+local Weapon = nil
+for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+  if v:IsA("Tool") then
+    table.insert(Weaponlist,v.Name)
+    end
+end
+
+
+function TP(CFrame)
+    pcall(function()
+        local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.CFrame = CFrame
+        else
+            wait(2)
+        end
+    end)
+end
+
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local ScreenGui1 = Instance.new("ScreenGui")
+ScreenGui1.Name = "ButtonGui"
+ScreenGui1.Parent = CoreGui
+ScreenGui1.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local TextButton1 = Instance.new("TextButton")
+TextButton1.Parent = ScreenGui1
+TextButton1.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+TextButton1.Size = UDim2.new(0, 50, 0, 50)
+TextButton1.Position = UDim2.new(0.120833337, 0, 0.0952890813, 0)
+TextButton1.BackgroundTransparency = 0.5
+TextButton1.Text = ""
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0.5, 0)
+UICorner.Parent = TextButton1
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Parent = TextButton1
+UIStroke.Color = Color3.fromRGB(0, 0, 0)
+UIStroke.Thickness = 2
+
+local Sound1 = Instance.new("Sound")
+Sound1.Parent = TextButton1
+Sound1.SoundId = "rbxassetid://12221967"
+Sound1.Volume = 1
+
+local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local tweenExpand = TweenService:Create(TextButton1, tweenInfo, {Size = UDim2.new(0, 55, 0, 55)})
+local tweenShrink = TweenService:Create(TextButton1, tweenInfo, {Size = UDim2.new(0, 50, 0, 50)})
+
+local isOn = false
+TextButton1.MouseButton1Click:Connect(function()
+    isOn = not isOn
+    if isOn then
+        TextButton1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    else
+        TextButton1.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    end
+    Sound1:Play()
+    tweenExpand:Play()
+    wait(0.1)
+    tweenShrink:Play()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, 305, false, game)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, 305, false, game)
+end)
+local Window = Fluent:CreateWindow({
+    Title = "แก้ : Glue piece",
+    SubTitle = "แก้",
+    TabWidth = 130,
+    Size = UDim2.fromOffset(460, 380),
+    Acrylic = false,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+})
+
+local Tab = {
+    Main = Window:AddTab({Title = "Main", Icon = "book"}),
+    Auto = Window:AddTab({Title = "Auto Farm", Icon = "swords"}),   
+    }
+local Dropdown = Tab.Main:AddDropdown("Dropdown", {
+   Title = "Select Weapon",
+   Values = Weaponlist,
+   Multi = false,
+   Default = nil,
+   Callback = function(mm)
+     _G.EQ = mm     
+   end
+})
+local Toggle = Tab.Main:AddToggle("Toggle", {
+    Title = "Auto Equip Weapon",
+    Default = false,
+    Callback = function(Wea)
+        _G.Weapon = Wea
+    end
+})
+spawn(function()
+while wait() do
+if _G.Weapon then
+pcall(function()
+game.Players.LocalPlayer.Character.Humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack:FindFirstChild(_G.EQ))
+end)
+end
+end
+end)
+
+
+
+
+local mu = Tab.Auto:AddDropdown("MultiDropdown", {
+    Title = "Select Mon",
+    Values = allmon,
+    Multi = true,
+    Default = {},
+    Callback = function(K)
+        _G.ABC = K
+    end
+})
+mu:OnChanged(function(selected)
+    _G.ABC = {}
+    for stand, isSelected in pairs(selected) do
+        if isSelected then
+            table.insert(_G.ABC, stand)
+        end
+    end
+end)
+
+local Toggle = Tab.Auto:AddToggle("Toggle", {
+    Title = "Auto Farm",
+    Default = false,
+    Callback = function(He)
+        _G.AutoFarm1 = He
+    end
+})
+local BB = Tab.Auto:AddSection("Auto Boss")
+
+local Boss = {}
+for i, v in pairs(game.ReplicatedStorage.Boss:GetChildren()) do
+    table.insert(Boss, v.Name)
+end
+table.insert(Boss, "Unknown Boss")
+
+
+local mu = BB:AddDropdown("MultiDropdown", {
+    Title = "Select Boss",
+    Values = Boss,
+    Multi = true,
+    Default = {},
+    Callback = function(KO)
+        _G.BB = KO
+    end
+})
+mu:OnChanged(function(selected)
+    _G.BB = {}
+    for stand, isSelected in pairs(selected) do
+        if isSelected then
+            table.insert(_G.BB, stand)
+        end
+    end
+end)
+local Toggle = BB:AddToggle("Toggle", {
+    Title = "Auto Farm Boss",
+    Default = false,
+    Callback = function(Hem)
+        _G.AutoFarm2 = Hem
+    end
+})
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarm1 then
+            pcall(function()
+                local npcs = game.Workspace.NPCs:GetDescendants()
+                for _, v in pairs(npcs) do
+                    if table.find(_G.ABC, v.Name) and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                        local humanoid = v.Humanoid
+                        if humanoid.Health > 1 then
+                            humanoid.WalkSpeed = 0
+                            humanoid.JumpPower = 0
+                            repeat
+                                task.wait()
+                                Attack()
+                                if _G.AutoFarm1 and humanoid.Health > 0 then
+                                    TP(v.HumanoidRootPart.CFrame * CFrame.new(0, 6, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+                                end
+                            until not _G.AutoFarm1 or humanoid.Health <= 0
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarm2 then
+            pcall(function()
+                local npcss = game.Workspace.NPCs.Boss:GetDescendants()
+                for _, v in pairs(npcss) do
+                    if table.find(_G.BB, v.Name) and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                        local humanoid = v.Humanoid
+                        if humanoid.Health > 1 then
+                            humanoid.WalkSpeed = 0
+                            humanoid.JumpPower = 0
+                            repeat
+                                task.wait()
+                                Attack()
+                                if _G.AutoFarm2 and humanoid.Health > 0 then
+                                    TP(v.HumanoidRootPart.CFrame * CFrame.new(0, 6, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+                                end
+                            until not _G.AutoFarm2 or humanoid.Health <= 0
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
