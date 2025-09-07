@@ -1917,6 +1917,8 @@ end
     return Colorpicker
 end
 
+		local ElementFunction = {}
+
 		function ElementFunction:AddSection(SectionConfig)
 			SectionConfig.Name = SectionConfig.Name or "Section"
 
